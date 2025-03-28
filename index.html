@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Viewer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      background-color: #303131;
+      color: white;
+      transition: background-color 1s ease, color 1s ease;
+    }
+    input {
+      width: 60%;
+      padding: 10px;
+      font-size: 16px;
+      margin: 20px 0;
+      border-radius: 10px;
+      transition: 0.3s;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #1e1f1f;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #333;
+    }
+    .close-btn {
+      background-color: #b22222;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    }
+    .close-btn:hover {
+      background-color: #d43f3f;
+    }
+    iframe {
+      width: 80%;
+      height: 80vh;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      display: block;
+      margin: 20px auto;
+      opacity: 0;
+      transition: opacity 0.5s ease-in;
+    }
+    iframe[src] {
+      opacity: 1;
+    }
+    #recentWebsites, #youtubeSearchResults {
+      margin: 20px auto;
+      padding: 10px;
+      width: 80%;
+      background-color: #646465;
+      border-radius: 10px;
+      text-align: left;
+      color: white;
+    }
+    #recentWebsites ul, #youtubeSearchResults ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    #recentWebsites ul li, #youtubeSearchResults ul li {
+      margin: 5px 0;
+    }
+    #recentWebsites ul li a, #youtubeSearchResults ul li a {
+      color: #aad8ff;
+      text-decoration: none;
+    }
+    #recentWebsites ul li a:hover, #youtubeSearchResults ul li a:hover {
+      text-decoration: underline;
+    }
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #646465;
+      min-width: 160px;
+      z-index: 1;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    .dropdown-content a {
+      color: white;
+      padding: 8px 10px;
+      text-decoration: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      border-radius: 5px;
+    }
+    .dropdown-content a:hover {
+      background-color: #444;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .light-theme {
+      background-color: white;
+      color: black;
+    }
+    .light-theme button {
+      background-color: lightgray;
+      color: black;
+    }
+    .light-theme iframe {
+      border-color: #ccc;
+    }
+    #loadingSpinner {
+      display: none;
+      margin-top: 20px;
+      color: #fff;
+    }
+    @media (max-width: 768px) {
+      input {
+        width: 80%;
+      }
+      .button-container {
+        flex-direction: column;
+        gap: 10px;
+      }
+      iframe {
+        width: 100%;
+        height: 60vh;
+      }
+    }
+
+    #discoButton {
+      position: fixed;
+      bottom: 0;
+      right: 20px;
+      background-color: #444;
+      color: white;
+      border: none;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 1000;
+      transition: background-color 0.3s ease;
+      width: 50px;
+      height: 50px;
+    }
+    #discoButton:hover {
+      background-color: #555;
+    }
+
+    .disco-mode {
+      animation: discoEffect 3s infinite alternate;
+      color: white;
+    }
+    @keyframes discoEffect {
+      0% {
+        background-color: #ff00ff;
+      }
+      20% {
+        background-color: #00ff00;
+      }
+      40% {
+        background-color: #ff0000;
+      }
+      60% {
+        background-color: #0000ff;
+      }
+      80% {
+        background-color: #ffff00;
+      }
+      100% {
+        background-color: #ff8000;
+      }
+    }
+
+    #refreshButton, #fullscreenButton, #clearHistoryButton {
+      padding: 10px 20px;
+      background-color: #1e1f1f;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: 0.3s;
+    }
+    #refreshButton:hover, #fullscreenButton:hover, #clearHistoryButton:hover {
+      background-color: #333;
+    }
+
+    #reloadMessage {
+      display: none;
+      font-size: 18px;
+      font-weight: bold;
+      background-color: #28a745;
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      margin-top: 20px;
+      animation: fadeInOut 3s ease-in-out;
+    }
+
+    @keyframes fadeInOut {
+      0% {
+        opacity: 0;
+      }
+      20% {
+        opacity: 1;
+      }
+      80% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Website Viewer</h1>
+  <p>Version 2.19</p>
+  
+  <input type="text" id="urlInput" placeholder="Enter a URL (e.g., https://example.com)">
+  <button onclick="loadWebsite()">Go</button>
+
+  <div class="button-container">
+    <div class="dropdown">
+      <button id="popularWebsitesBtn" class="dropdown-btn" onmouseover="deselectWebsite()">Popular Websites</button>
+      <div class="dropdown-content">
+        <a href="#" onclick="loadPopularWebsite('https://myinstants.com')">Myinstants</a>
+        <a href="#" onclick="loadPopularWebsite('https://www.bing.com/videos/')">Bing (for Videos)</a>
+        <a href="#" onclick="loadPopularWebsite('https://littlealchemy2.com/')">Little Alchemy</a>
+        <a href="#" onclick="loadPopularWebsite('https://www.nyan.cat/')">NyanCat (Filler For Now)</a>
+        <a href="#" onclick="loadPopularWebsite('https://www.iheart.com/')">Music - Buggy</a>
+      </div>
+    </div>
+    <button class="close-btn" onclick="closeWebsite()">Close Current Website</button>
+    <button onclick="toggleTheme()">Toggle Theme</button>
+  </div>
+
+  <!-- Refresh, Fullscreen, and Clear History Buttons -->
+  <div>
+    <button id="refreshButton" onclick="refreshWebsite()">Refresh (Only if website is loaded)</button>
+    <button id="fullscreenButton" onclick="toggleFullscreen()">Fullscreen</button>
+    <button id="clearHistoryButton" onclick="clearRecentHistory()">Clear Recent History</button>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div id="loadingSpinner">Loading...</div>
+
+  <!-- Iframe for website display -->
+  <iframe id="webFrame" src="" title="Website Viewer" onload="hideSpinner()"></iframe>
+
+  <!-- Reload Message -->
+  <div id="reloadMessage">Successfully Reloaded!</div>
+
+  <div id="recentWebsites">
+    <h2>Recent Websites Visited:</h2>
+    <ul id="websiteList"></ul>
+  </div>
+
+  <button id="discoButton" onclick="toggleDiscoMode()">?</button>
+
+  <script>
+    function loadWebsite() {
+      document.getElementById('loadingSpinner').style.display = 'block';
+      const urlInput = document.getElementById('urlInput').value;
+      const webFrame = document.getElementById('webFrame');
+      const websiteList = document.getElementById('websiteList');
+      
+      if (!urlInput.startsWith('http://') && !urlInput.startsWith('https://')) {
+        alert('Please enter a valid URL starting with http:// or https://');
+        return;
+      }
+
+      webFrame.src = urlInput;
+
+      const recentWebsites = JSON.parse(localStorage.getItem('recentWebsites')) || [];
+      recentWebsites.push(urlInput);
+      localStorage.setItem('recentWebsites', JSON.stringify(recentWebsites));
+
+      updateRecentWebsites();
+    }
+
+    function closeWebsite() {
+      document.getElementById('webFrame').src = "";
+      document.getElementById('urlInput').value = "";
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+    }
+
+    function updateRecentWebsites() {
+      const websiteList = document.getElementById('websiteList');
+      const recentWebsites = JSON.parse(localStorage.getItem('recentWebsites')) || [];
+
+      websiteList.innerHTML = '';
+
+      recentWebsites.forEach(url => {
+        const newListItem = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = "#";
+        link.textContent = url;
+        link.onclick = function() {
+          document.getElementById('urlInput').value = url;
+          loadWebsite();
+        };
+        newListItem.appendChild(link);
+        websiteList.appendChild(newListItem);
+      });
+    }
+
+    function hideSpinner() {
+      document.getElementById('loadingSpinner').style.display = 'none';
+    }
+
+    function loadPopularWebsite(url) {
+      const webFrame = document.getElementById('webFrame');
+      const websiteList = document.getElementById('websiteList');
+
+      webFrame.src = url;
+      document.getElementById('urlInput').value = url;
+
+      const newListItem = document.createElement('li');
+      const link = document.createElement('a');
+      link.href = "#";
+      link.textContent = url;
+      link.onclick = function() {
+        document.getElementById('urlInput').value = url;
+        loadWebsite();
+      };
+      newListItem.appendChild(link);
+      websiteList.appendChild(newListItem);
+    }
+
+    function deselectWebsite() {
+      document.getElementById('popularWebsitesBtn').blur();
+    }
+
+    window.onload = updateRecentWebsites;
+
+    function toggleDiscoMode() {
+      document.body.classList.toggle('disco-mode');
+      const iframe = document.getElementById('webFrame');
+      iframe.classList.toggle('disco-mode');
+      const elements = document.querySelectorAll('button, input, iframe, .dropdown-content, #discoButton, .close-btn');
+      elements.forEach((el) => {
+        el.classList.toggle('disco-mode');
+      });
+    }
+
+    function refreshWebsite() {
+      const iframe = document.getElementById('webFrame');
+      iframe.src = iframe.src;
+
+      const reloadMessage = document.getElementById('reloadMessage');
+      reloadMessage.style.display = 'block';
+      setTimeout(() => {
+        reloadMessage.style.display = 'none';
+      }, 3000);
+    }
+
+    function toggleFullscreen() {
+      const iframe = document.getElementById('webFrame');
+      if (iframe.requestFullscreen) {
+        iframe.requestFullscreen();
+      } else if (iframe.mozRequestFullScreen) {
+        iframe.mozRequestFullScreen();
+      } else if (iframe.webkitRequestFullscreen) {
+        iframe.webkitRequestFullscreen();
+      } else if (iframe.msRequestFullscreen) {
+        iframe.msRequestFullscreen();
+      }
+    }
+
+    function clearRecentHistory() {
+      localStorage.removeItem('recentWebsites');
+      updateRecentWebsites();
+    }
+  </script>
+</body>
+</html>
